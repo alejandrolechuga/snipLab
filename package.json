@@ -1,7 +1,7 @@
 {
-  "name": "http-mocky",
+  "name": "snip-lab",
   "version": "1.12.0",
-  "description": "Chrome extension to override fetch/XHR responses",
+  "description": "A powerful tool to create, manage, and run JavaScript snippets on any webpage.",
   "license": "MIT",
   "repository": {
     "type": "git",

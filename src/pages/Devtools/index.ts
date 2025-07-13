@@ -20,11 +20,11 @@ if (typeof chrome !== 'undefined') {
 
 if (chrome.devtools?.panels) {
   chrome.devtools.panels.create(
-    'HTTPMocky',
+    'SnipLab',
     'icon-34.png',
     'panel.html',
     () => {
-      console.log('HTTPMocky panel created');
+      console.log('SnipLab panel created');
     }
   );
 } else {
@@ -47,7 +47,7 @@ window.addEventListener('beforeunload', () => {
       from: ExtensionMessageOrigin.DEVTOOLS,
       state: {
         settings: { patched: false },
-        ruleset: [],
+        scripts: [],
       },
     });
   }
