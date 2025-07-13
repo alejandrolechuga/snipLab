@@ -12,8 +12,19 @@ const scriptSlice = createSlice({
       reducer(state, action: PayloadAction<Script>) {
         state.push(action.payload);
       },
-      prepare(script: Omit<Script, 'id'>) {
-        return { payload: { ...script, id: uuidv4() } };
+      prepare(
+        script: Omit<Script, 'id'> & {
+          /** Optional parent folder id */
+          parentId?: string;
+        }
+      ) {
+        return {
+          payload: {
+            ...script,
+            id: uuidv4(),
+            parentId: script.parentId,
+          },
+        };
       },
     },
     updateScript(
