@@ -7,7 +7,7 @@ const Panel: React.FC = () => {
   const [editing, setEditing] = useState<Script | null>(null);
 
   return (
-    <div className="space-y-4 p-2 text-white">
+    <div className="space-y-4 bg-zinc-800 p-4 text-white min-h-screen">
       <h1 className="text-xl font-bold">Welcome to SnipLab</h1>
       <ScriptList
         onRun={(s) => {
