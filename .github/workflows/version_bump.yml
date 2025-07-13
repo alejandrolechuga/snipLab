@@ -1,0 +1,54 @@
+name: Version bump on changeset
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  version:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')" 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # important so Changesets can compare commits
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create version bump
+        run: npx changeset version
+
+      - name: Use SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Sync manifest version
+        run: |
+          node - <<'EOF'
+          const fs = require('fs');
+          const pkg = require('./package.json');
+          const manifestPath = './src/manifest.json';
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+          manifest.version = pkg.version;
+          fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+          EOF
+      - name: Push version bump
+        run: |
+          git config user.name "version-bot"
+          git config user.email "version-bot@local"
+          VERSION=$(node -p "require('./package.json').version")
+          git add .
+          git commit -m "chore: version bump $VERSION [skip ci]"
+          git tag "v$VERSION"
+          git push git@github.com:${GITHUB_REPOSITORY}.git HEAD:master --follow-tags
+
