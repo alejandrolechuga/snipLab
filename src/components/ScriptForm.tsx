@@ -11,13 +11,11 @@ interface ScriptFormProps {
 const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
   const dispatch = useAppDispatch();
   const [name, setName] = useState(script?.name || '');
-  const [description, setDescription] = useState(script?.description || '');
   const [code, setCode] = useState(script?.code || '');
 
   useEffect(() => {
     if (script) {
       setName(script.name);
-      setDescription(script.description);
       setCode(script.code);
     }
   }, [script]);
@@ -25,13 +23,10 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (script) {
-      dispatch(
-        updateScript({ id: script.id, changes: { name, description, code } })
-      );
+      dispatch(updateScript({ id: script.id, changes: { name, code } }));
     } else {
-      dispatch(addScript({ name, description, code }));
+      dispatch(addScript({ name, description: '', code }));
       setName('');
-      setDescription('');
       setCode('');
     }
     onSave?.();
@@ -44,13 +39,6 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full rounded border px-2 py-1 text-black"
-      />
-      <input
-        type="text"
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
         className="w-full rounded border px-2 py-1 text-black"
       />
       <textarea
