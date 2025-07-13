@@ -4,6 +4,10 @@ import settingsReducer, { setPatched } from './settingsSlice';
 import scriptsReducer, { setScripts } from './scriptSlice';
 import matchesReducer, { incrementMatch } from './matchSlice';
 import featuresReducer from './featureSlice';
+import devtoolsReducer, {
+  setDevtoolsPanelReady,
+  setContentScriptReady,
+} from './devtoolsSlice';
 import {
   ExtensionMessageType,
   ExtensionMessageOrigin,
@@ -21,6 +25,7 @@ export const store = configureStore({
     scripts: scriptsReducer,
     matches: matchesReducer,
     features: featuresReducer,
+    devtools: devtoolsReducer,
   },
 });
 
@@ -29,6 +34,8 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+export { setDevtoolsPanelReady, setContentScriptReady };
 
 // When running as a Chrome extension, load persisted settings and scripts from
 // chrome.storage.local so the store reflects the last saved state.
@@ -49,7 +56,7 @@ let previousScripts = store.getState().scripts;
 // we always write the latest state after each dispatch.
 store.subscribe(() => {
   const state = store.getState();
-  const { settings, scripts } = state;
+  const { settings, scripts, devtools } = state;
 
   if (previousSettings !== settings || previousScripts !== scripts) {
     previousSettings = settings;
@@ -58,14 +65,14 @@ store.subscribe(() => {
     safeSetStorageLocal({ settings, scripts });
 
     const inspectedWindow = safeDevtoolsInspectedWindow();
-    if (chrome.tabs && inspectedWindow) {
+    const devtoolsPanelIsReady = devtools.isReady;
+    const contentScriptIsReady = devtools.contentScriptReady;
+    if (devtoolsPanelIsReady && contentScriptIsReady && chrome.tabs && inspectedWindow) {
       safeSendMessage(inspectedWindow.tabId, {
         action: ExtensionMessageType.STATE_UPDATE,
         from: ExtensionMessageOrigin.DEVTOOLS,
         state,
       });
-    } else {
-      console.log('chrome devtools not available, skipping state broadcast');
     }
   }
 });
@@ -77,7 +84,10 @@ export const emitExtensionState = async () => {
     'settings',
   ]);
   const inspectedWindow = safeDevtoolsInspectedWindow();
-  if (chrome.tabs && inspectedWindow) {
+  const { devtools } = store.getState();
+  const devtoolsPanelIsReady = devtools.isReady;
+  const contentScriptIsReady = devtools.contentScriptReady;
+  if (devtoolsPanelIsReady && contentScriptIsReady && chrome.tabs && inspectedWindow) {
     safeSendMessage(inspectedWindow.tabId, {
       action: ExtensionMessageType.STATE_UPDATE,
       from: ExtensionMessageOrigin.DEVTOOLS,
@@ -88,8 +98,6 @@ export const emitExtensionState = async () => {
         },
       },
     });
-  } else {
-    console.log('chrome devtools not available, skipping state broadcast');
   }
 };
 
@@ -97,6 +105,10 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((message) => {
     if (message.payload?.action === ExtensionMessageType.RULE_MATCHED) {
       store.dispatch(incrementMatch(message.payload.ruleId));
+    }
+    if (message.payload?.action === ExtensionMessageType.RECEIVER_READY) {
+      store.dispatch(setContentScriptReady(true));
+      emitExtensionState();
     }
   });
 }
