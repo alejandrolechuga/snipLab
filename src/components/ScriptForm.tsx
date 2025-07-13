@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Editor from '@monaco-editor/react';
 import { useAppDispatch } from '../store';
 import { addScript, updateScript } from '../store/scriptSlice';
 import type { Script } from '../types/script';
@@ -41,13 +42,20 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
         onChange={(e) => setName(e.target.value)}
         className="w-full rounded border px-2 py-1 text-black"
       />
-      <textarea
-        placeholder="Code"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        className="w-full rounded border px-2 py-1 font-mono text-black"
-        rows={6}
-      />
+      <div className="border rounded overflow-hidden">
+        <Editor
+          height="300px"
+          defaultLanguage="javascript"
+          value={code}
+          onChange={(value) => setCode(value ?? '')}
+          theme="vs-dark"
+          options={{
+            fontSize: 14,
+            minimap: { enabled: false },
+            automaticLayout: true,
+          }}
+        />
+      </div>
       <button type="submit" className="rounded bg-blue-600 px-2 py-1 text-white">
         Save
       </button>

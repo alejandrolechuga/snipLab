@@ -31,10 +31,12 @@
     "changeset": "npx changeset"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "*",
     "class-variance-authority": "*",
     "clsx": "*",
     "lucide-react": "*",
+    "monaco-editor": "^0.52.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "*",
