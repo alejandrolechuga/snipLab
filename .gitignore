@@ -36,7 +36,7 @@ logs
 # Optional npm cache directory
 .npm
 
-# Optional eslint cache
+# Optional npm install --save-dev eslint-plugin-react @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-react-hooks cache
 .eslintcache
 
 # Optional stylelint cache
