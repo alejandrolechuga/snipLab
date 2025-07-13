@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
-import App from './App';
+import Panel from './Panel';
 import { store } from '../../store';
 import './index.css';
 import '../../styles/globals.css';
@@ -12,7 +12,7 @@ if (container) {
   const root = createRoot(container);
   root.render(
     <Provider store={store}>
-      <App />
+      <Panel />
     </Provider>
   );
 } else {

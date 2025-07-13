@@ -61,7 +61,6 @@ const options: MyWebpackConfiguration = {
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
     devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.ts'),
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.tsx'),
-    window: path.join(__dirname, 'src', 'pages', 'Window', 'index.ts'),
   },
   chromeExtensionBoilerplate: {
     // Your custom property
@@ -69,7 +68,6 @@ const options: MyWebpackConfiguration = {
       'background',
       'contentScript',
       'devtools',
-      'window',
       'panel',
       'background',
     ],
