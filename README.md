@@ -1,27 +1,8 @@
-## HTTPMocky 🐵
+## Network Interceptor Extension
 
-![Image (1)](https://github.com/user-attachments/assets/d12810fd-3677-464b-83be-762b8b638681)
-
-HTTPMocky is a Chrome extension that lets you intercept, inspect, and override fetch and XMLHttpRequest calls directly in the browser. Useful for testing APIs, simulating error states, or mocking responses without touching your backend.
-
-✨ Features
-✅ Intercepts both fetch and XHR requests
-
-- ⚙️ Modify request/response payloads, headers, or status codes
-
-- 🔁 Toggle patching on/off in real time
-
-- 🎯 Match requests by URL, method, or regex
-
-- 🔍 Built-in DevTools panel for debugging
-
-🔐 Use cases
-
-- Frontend API mocking and testing
-
-- Simulating slow or failed network responses
-
-- Developing against unstable or unavailable backends
+This repository contains a lightweight Chrome extension that intercepts
+`fetch` and `XMLHttpRequest` calls. It can be used to inspect network
+traffic or mock API responses during development.
 
 ## Installing and Running
 
