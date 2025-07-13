@@ -39,7 +39,7 @@ describe('Devtools unload behavior', () => {
         from: ExtensionMessageOrigin.DEVTOOLS,
         state: {
           settings: { patched: false },
-          ruleset: [],
+          scripts: [],
         },
       }),
       expect.anything()

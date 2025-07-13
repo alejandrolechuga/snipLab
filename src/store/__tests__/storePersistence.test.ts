@@ -1,5 +1,5 @@
 import { setPatched } from '../settingsSlice';
-import { addRule } from '../../Panel/ruleset/rulesetSlice';
+import { addScript } from '../scriptSlice';
 
 describe('store persistence', () => {
   beforeEach(() => {
@@ -30,53 +30,44 @@ describe('store persistence', () => {
   it('loads persisted data on init', async () => {
     const stored = {
       settings: { patched: true },
-      ruleset: [
+      scripts: [
         {
           id: '1',
-          urlPattern: '/api',
-          isRegExp: false,
-          method: 'GET',
-          enabled: true,
-          date: '',
-          response: null,
-          delayMs: null,
+          name: 'test',
+          description: '',
+          code: 'console.log(1);',
         },
       ],
     };
     createChromeMocks(stored);
     const { store } = await import('../index');
     expect(store.getState().settings.patched).toBe(true);
-    expect(store.getState().ruleset).toEqual(stored.ruleset);
+    expect(store.getState().scripts).toEqual(stored.scripts);
   });
 
   it('persists updates to chrome.storage.local', async () => {
-    const stored = { settings: { patched: false }, ruleset: [] };
+    const stored = { settings: { patched: false }, scripts: [] };
     const { setMock } = createChromeMocks(stored);
     const { store } = await import('../index');
 
     store.dispatch(setPatched(true));
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
-      ruleset: [],
+      scripts: [],
     });
 
     store.dispatch(
-      addRule({
-        urlPattern: '/test',
-        isRegExp: false,
-        method: 'GET',
-        enabled: true,
-        date: '',
-        response: null,
-        statusCode: 200,
-        delayMs: null,
+      addScript({
+        name: 'demo',
+        description: '',
+        code: 'console.log(1);',
       })
     );
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
-      ruleset: expect.any(Array),
+      scripts: expect.any(Array),
     });
     const lastCall = setMock.mock.calls[setMock.mock.calls.length - 1][0];
-    expect(lastCall.ruleset).toHaveLength(1);
+    expect(lastCall.scripts).toHaveLength(1);
   });
 });

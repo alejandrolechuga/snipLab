@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "HTTPMocky",
-  "description": "DevTools panel + content script that rewrites fetch/XHR responses",
+  "name": "SnipLab",
+  "description": "A powerful tool to create, manage, and run JavaScript snippets on any webpage.",
   "version": "1.12.0",
   "devtools_page": "devtools.html",
   "background": {
@@ -26,16 +26,6 @@
       ],
       "run_at": "document_start",
       "world": "ISOLATED"
-    },
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "window.bundle.js"
-      ],
-      "world": "MAIN",
-      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": []
