@@ -1,8 +1,19 @@
-## Network Interceptor Extension
+# SnipLab
 
-This repository contains a lightweight Chrome extension that intercepts
-`fetch` and `XMLHttpRequest` calls. It can be used to inspect network
-traffic or mock API responses during development.
+SnipLab is a developer-focused Chrome extension that lets you create, manage,
+and run JavaScript snippets directly within any webpage.
+
+It provides:
+
+- A simple interface for writing and editing code snippets
+- One-click execution in the context of the active tab
+- Script persistence across sessions
+- Future support for AI-assisted script generation, sharing across teams, and
+  trigger-based automation
+
+SnipLab is designed to boost productivity during debugging, prototyping,
+testing, or automation — giving you full control of script execution without
+needing external tools or manual injection.
 
 ## Installing and Running
 
@@ -18,11 +29,6 @@ traffic or mock API responses during development.
    2. Check `Developer mode`
    3. Click on `Load unpacked extension`
    4. Select the `build` folder.
-
-### Dev Tools - Modifications to deve tools panel
-
-Added static content to dev tools panel in this case it is an array of strings
-and a loop to display the list in the page and changed added a version in the title
 
 ## Generate a build
 
