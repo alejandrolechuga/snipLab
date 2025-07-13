@@ -9,6 +9,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
           eval(code);
         },
         args: [message.script.code],
+        world: 'MAIN',
       });
     }
   }
