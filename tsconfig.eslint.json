@@ -1,26 +1,23 @@
 {
-  "extends": "./tsconfig.json", // Inherits from your main tsconfig.json
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true, // ESLint's tsconfig shouldn't produce output files
-    "allowJs": false // Assuming all relevant files for linting are now .ts
-    // Set to true if you have other JS files you want ESLint to see
+    "noEmit": true,
+    "allowJs": false
   },
   "include": [
-    "src/**/*", // All TS/TSX/JS files within src
-    "utils/**/*.ts", // Your converted utility scripts
-    "lib/**/*.ts", // Your converted library files
-    "webpack.config.ts", // Your Webpack configuration
-    "jest.config.ts", // Your Jest configuration
-    "jest.setup.ts", // Your Jest setup file
-    "__mocks__/**/*.ts", // Your mock files
+    "src/**/*",
+    "utils/**/*.ts",
+    "lib/**/*.ts",
+    "webpack.config.ts",
+    "jest.config.ts",
+    "jest.setup.ts",
+    "__mocks__/**/*.ts",
     "tailwind.config.ts",
     "postcss.config.ts"
-    // Add any other .ts files at the root or other locations if needed
   ],
   "exclude": [
     "node_modules",
     "build",
     "dist"
-    // Any other specific exclusions for linting
   ]
 }
