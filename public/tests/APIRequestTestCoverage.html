@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>API Request Test Coverage</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 4px 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>API Request Test Coverage</h1>
+    <button id="downloadRules">💾 Download Rules JSON</button>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Method</th>
+          <th>Type</th>
+          <th>Result</th>
+          <th>Expected</th>
+          <th>Actual</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script type="module">
+      import { apiRequestTestCases } from './APIRequestTestCoverageData.js';
+
+      const downloadBtn = document.getElementById('downloadRules');
+      downloadBtn.addEventListener('click', () => {
+        const rules = apiRequestTestCases.map((test) => ({
+          id: `test-${test.method}-${test.type}`.toLowerCase(),
+          urlPattern: test.url,
+          method: test.method,
+          isRegExp: false,
+          enabled: true,
+          statusCode: 200,
+          response: JSON.stringify(test.expectedResponse),
+          requestBody: test.body ?? null,
+          delayMs: 0,
+          date: new Date().toISOString(),
+        }));
+        const json = JSON.stringify(rules, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'testRules.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      const tbody = document.querySelector('#results tbody');
+
+      async function runFetch(test) {
+        const response = await fetch(test.url, {
+          method: test.method,
+          body: test.body,
+          headers: { 'Content-Type': 'application/json' },
+        });
+        return response.json();
+      }
+
+      function runXhr(test) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open(test.method, test.url);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = () => {
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch (e) {
+              reject(e);
+            }
+          };
+          xhr.onerror = reject;
+          xhr.send(test.body);
+        });
+      }
+
+      function compare(expected, actual) {
+        return JSON.stringify(expected) === JSON.stringify(actual);
+      }
+
+      async function runTests() {
+        for (const test of apiRequestTestCases) {
+          let actual;
+          try {
+            actual = test.type === 'fetch' ? await runFetch(test) : await runXhr(test);
+          } catch (err) {
+            actual = { error: err.toString() };
+          }
+
+          const success = compare(test.expectedResponse, actual);
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${test.name}</td>
+            <td>${test.method}</td>
+            <td>${test.type}</td>
+            <td>${success ? '✅' : '❌'}</td>
+            <td><pre>${JSON.stringify(test.expectedResponse)}</pre></td>
+            <td><pre>${JSON.stringify(actual)}</pre></td>
+          `;
+          tbody.appendChild(row);
+        }
+      }
+
+      runTests();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+// tsconfig.scripts.json
+{
+  "extends": "./tsconfig.json", // Inherit common settings (like target, lib, strict, paths, etc.)
+  "compilerOptions": {
+    "module": "CommonJS", // Override: Output CommonJS for these Node scripts
+    "outDir": "./dist-scripts", // Optional: if you ever wanted to compile them separately
+    // ts-node won't emit here during execution
+    "noEmit": true, // ts-node executes in memory, no need to emit files for this purpose
+    // Remove or adjust rootDir if it causes issues for files outside 'src'
+    // "rootDir": "./", // Might be needed if utils and webpack.config.ts are at root
+    "skipLibCheck": true,
+    "esModuleInterop": true // Important for import syntax
+  },
+  "include": [
+    "utils/**/*.ts", // Your utility scripts
+    "scripts/**/*.ts",
+    "webpack.config.ts" // Your webpack config
+    // Add any other .ts scripts that are run directly by Node.js via ts-node
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "src" // Exclude your main app source from this specific config if it causes conflicts
+  ],
+  "ts-node": {
+    // Options for ts-node when using this config file
+    "transpileOnly": true, // Speeds up execution, type checking is done by `tsc --noEmit` or ESLint
+    "compilerOptions": {
+      // Can override compilerOptions specifically for ts-node here if needed
+      // For example, if 'module' needed to be different for ts-node vs tsc with this config
+    }
+  }
+}

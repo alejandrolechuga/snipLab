@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "urlPattern": "https://api.example.com/*",
+    "isRegExp": false,
+    "method": "GET",
+    "enabled": true,
+    "statusCode": 200,
+    "date": "2024-01-01",
+    "response": null,
+    "delayMs": null
+  },
+  {
+    "id": "2",
+    "urlPattern": "https://static.example.com/*",
+    "isRegExp": false,
+    "method": "POST",
+    "enabled": false,
+    "statusCode": 200,
+    "date": "2024-02-10",
+    "response": null,
+    "delayMs": null
+  },
+  {
+    "id": "3",
+    "urlPattern": "https://service.example.com/info",
+    "isRegExp": false,
+    "method": "PUT",
+    "enabled": true,
+    "statusCode": 200,
+    "date": "2024-03-15",
+    "response": null,
+    "delayMs": null
+  },
+  {
+    "id": "4",
+    "urlPattern": "https://jsonplaceholder.typicode.com/todos/1",
+    "isRegExp": false,
+    "method": "GET",
+    "enabled": true,
+    "statusCode": 200,
+    "date": "2024-04-01",
+    "response": "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"hello,\",\n  \"completed\": false\n}",
+    "delayMs": null
+  }
+]
