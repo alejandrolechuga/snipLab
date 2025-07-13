@@ -25,7 +25,9 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (script) {
-      dispatch(updateScript({ id: script.id, changes: { name, description, code } }));
+      dispatch(
+        updateScript({ id: script.id, changes: { name, description, code } })
+      );
     } else {
       dispatch(addScript({ name, description, code }));
       setName('');
