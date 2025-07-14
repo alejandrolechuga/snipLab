@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
+import { safeDevtoolsInspectedWindow } from '../../chrome';
 
 const Panel: React.FC = () => {
   const [editing, setEditing] = useState<Script | null>(null);
@@ -13,7 +14,14 @@ const Panel: React.FC = () => {
         <div className="w-1/3 overflow-y-auto pr-4 border-r border-zinc-700">
           <ScriptList
             onRun={(s) => {
-              chrome.runtime.sendMessage({ action: 'RUN_SCRIPT', script: s });
+              const inspectedWindow = safeDevtoolsInspectedWindow();
+              const tabId = inspectedWindow?.tabId;
+              if (tabId !== undefined) {
+                chrome.runtime.sendMessage({ action: 'RUN_SCRIPT', script: s, tabId });
+              } else {
+                console.warn('No inspected window tabId; sending message without tabId');
+                chrome.runtime.sendMessage({ action: 'RUN_SCRIPT', script: s });
+              }
             }}
             onEdit={(s) => setEditing(s)}
           />
