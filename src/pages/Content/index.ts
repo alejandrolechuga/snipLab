@@ -2,14 +2,23 @@ import { ExtensionMessageOrigin } from '../../../src/types/runtimeMessage';
 
 declare const chrome: any;
 
-const injectMainWorldBridge = () => {
+const injectMainWorldBridge = async () => {
   if (!chrome.scripting) {
     console.warn('[Content] chrome.scripting API not available.');
     return;
   }
+
+  const response = await chrome.runtime.sendMessage({ action: 'GET_CURRENT_TAB_ID' });
+  const currentTabId = response?.tabId;
+
+  if (currentTabId === undefined) {
+    console.warn('[Content] Failed to retrieve current tabId for bridge injection.');
+    return;
+  }
+
   chrome.scripting.executeScript(
     {
-      target: { tabId: chrome.devtools?.inspectedWindow?.tabId || null },
+      target: { tabId: currentTabId },
       world: 'MAIN',
       func: () => {
         return typeof window.__snipLabMainWorldAPI !== 'undefined';
@@ -18,17 +27,20 @@ const injectMainWorldBridge = () => {
     (results: any[]) => {
       const bridgeAlreadyInjected = results && results[0]?.result;
       if (!bridgeAlreadyInjected) {
-        chrome.scripting.executeScript({
-          target: { tabId: chrome.devtools?.inspectedWindow?.tabId || null },
-          files: ['src/content-scripts/main-world-bridge.js'],
-          world: 'MAIN',
-        }, () => {
-          if (chrome.runtime.lastError) {
-            console.error('[Content] Error injecting main-world bridge:', chrome.runtime.lastError.message);
-          } else {
-            console.log('[Content] Main-world bridge injected successfully.');
+        chrome.scripting.executeScript(
+          {
+            target: { tabId: currentTabId },
+            files: ['src/content-scripts/main-world-bridge.js'],
+            world: 'MAIN',
+          },
+          () => {
+            if (chrome.runtime.lastError) {
+              console.error('[Content] Error injecting main-world bridge:', chrome.runtime.lastError.message);
+            } else {
+              console.log('[Content] Main-world bridge injected successfully.');
+            }
           }
-        });
+        );
       } else {
         console.log('[Content] Main-world bridge already present.');
       }
@@ -85,7 +97,7 @@ export function listenPanelMessages() {
       if (message.from === ExtensionMessageOrigin.DEVTOOLS) {
         if (message.payload?.action === 'CALL_MAIN_WORLD_API') {
           chrome.scripting.executeScript({
-            target: { tabId: chrome.devtools?.inspectedWindow?.tabId },
+            target: { tabId: message.tabId },
             world: 'MAIN',
             func: (bridgeAction: string, bridgeArgs: any[]) => {
               if (window.__snipLabMainWorldAPI && window.__snipLabMainWorldAPI[bridgeAction]) {
