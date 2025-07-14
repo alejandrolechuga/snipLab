@@ -1,6 +1,7 @@
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'RUN_SCRIPT' && message.script?.code) {
-    const tabId = sender.tab?.id;
+    const tabId =
+      message.tabId !== undefined ? message.tabId : sender.tab?.id;
     if (tabId !== undefined && chrome.scripting) {
       chrome.scripting.executeScript({
         target: { tabId },
