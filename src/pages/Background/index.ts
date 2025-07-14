@@ -54,10 +54,12 @@ chrome.runtime.onMessage.addListener(
         console.log(
           `[Background] Sent RUN_SCRIPT message to content script in tab ${targetTabId}`
         );
+        sendResponse({ status: 'received' });
       } else {
         console.warn(
           '[Background] Script execution skipped: No target tab ID available in message or sender.'
         );
+        sendResponse({ status: 'failed', error: 'No target tab ID' });
       }
     } else if (message.action === 'GET_CURRENT_TAB_ID') {
       if (sender.tab && sender.tab.id !== undefined) {
