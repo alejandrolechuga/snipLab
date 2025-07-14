@@ -1,5 +1,41 @@
 import { ExtensionMessageOrigin } from '../../../src/types/runtimeMessage';
 
+declare const chrome: any;
+
+const injectMainWorldBridge = () => {
+  if (!chrome.scripting) {
+    console.warn('[Content] chrome.scripting API not available.');
+    return;
+  }
+  chrome.scripting.executeScript(
+    {
+      target: { tabId: chrome.devtools?.inspectedWindow?.tabId || null },
+      world: 'MAIN',
+      func: () => {
+        return typeof window.__snipLabMainWorldAPI !== 'undefined';
+      },
+    },
+    (results: any[]) => {
+      const bridgeAlreadyInjected = results && results[0]?.result;
+      if (!bridgeAlreadyInjected) {
+        chrome.scripting.executeScript({
+          target: { tabId: chrome.devtools?.inspectedWindow?.tabId || null },
+          files: ['src/content-scripts/main-world-bridge.js'],
+          world: 'MAIN',
+        }, () => {
+          if (chrome.runtime.lastError) {
+            console.error('[Content] Error injecting main-world bridge:', chrome.runtime.lastError.message);
+          } else {
+            console.log('[Content] Main-world bridge injected successfully.');
+          }
+        });
+      } else {
+        console.log('[Content] Main-world bridge already present.');
+      }
+    }
+  );
+};
+
 export const listenInjectedScript = () => {
   window.addEventListener('message', function (event) {
     // Filter out any messages not sent by our extension code
@@ -27,6 +63,14 @@ export const listenInjectedScript = () => {
         console.error('[Content] Failed to forward message', error);
       }
     }
+
+    if (event.data.type === 'SNIPLAB_RESPONSE') {
+      console.log('[Content] Received response from main world bridge:', event.data);
+      chrome.runtime.sendMessage({
+        source: ExtensionMessageOrigin.CONTENT_SCRIPT,
+        payload: { action: 'BRIDGE_RESPONSE', data: event.data },
+      });
+    }
   });
 };
 
@@ -36,15 +80,29 @@ export function listenPanelMessages() {
     chrome.runtime &&
     chrome.runtime.onMessage
   ) {
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
       console.log('[Content] Received message from panel:', message, sender);
       if (message.from === ExtensionMessageOrigin.DEVTOOLS) {
-        window.postMessage(message, '*');
+        if (message.payload?.action === 'CALL_MAIN_WORLD_API') {
+          chrome.scripting.executeScript({
+            target: { tabId: chrome.devtools?.inspectedWindow?.tabId },
+            world: 'MAIN',
+            func: (bridgeAction: string, bridgeArgs: any[]) => {
+              if (window.__snipLabMainWorldAPI && window.__snipLabMainWorldAPI[bridgeAction]) {
+                window.__snipLabMainWorldAPI[bridgeAction](...bridgeArgs);
+              }
+            },
+            args: [message.payload.bridgeAction, message.payload.bridgeArgs],
+          });
+        } else {
+          window.postMessage(message, '*');
+        }
       }
     });
   } else {
     console.warn('[Content] chrome.runtime.onMessage is not available');
   }
 }
+injectMainWorldBridge();
 listenInjectedScript();
 listenPanelMessages();

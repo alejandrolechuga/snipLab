@@ -29,5 +29,10 @@
       "world": "ISOLATED"
     }
   ],
-  "web_accessible_resources": []
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content-scripts/main-world-bridge.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

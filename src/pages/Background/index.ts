@@ -4,6 +4,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     if (tabId !== undefined && chrome.scripting) {
       chrome.scripting.executeScript({
         target: { tabId },
+        world: 'ISOLATED',
         func: (code: string) => {
           // eslint-disable-next-line no-eval
           eval(code);
