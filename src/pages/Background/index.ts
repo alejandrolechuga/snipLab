@@ -1,11 +1,11 @@
 chrome.runtime.onMessage.addListener(
   (message, sender, sendResponse) => {
     if (message.action === 'RUN_SCRIPT' && message.script?.code) {
-      const tabId =
+      const targetTabId =
         message.tabId !== undefined ? message.tabId : sender.tab?.id;
-      if (tabId !== undefined && chrome.scripting) {
+      if (targetTabId !== undefined && chrome.scripting) {
         chrome.scripting.executeScript({
-          target: { tabId },
+          target: { tabId: targetTabId },
           world: 'ISOLATED',
           func: (code: string) => {
             // eslint-disable-next-line no-eval
@@ -13,6 +13,8 @@ chrome.runtime.onMessage.addListener(
           },
           args: [message.script.code],
         });
+      } else {
+        console.warn('[Background] Could not determine tabId for RUN_SCRIPT');
       }
     } else if (message.action === 'GET_CURRENT_TAB_ID') {
       if (sender.tab && sender.tab.id !== undefined) {
