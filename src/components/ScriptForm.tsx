@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
 import { useAppDispatch } from '../store';
 import { addScript, updateScript } from '../store/scriptSlice';
 import type { Script } from '../types/script';
@@ -41,12 +43,13 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
         onChange={(e) => setName(e.target.value)}
         className="w-full rounded border px-2 py-1 text-black"
       />
-      <textarea
-        placeholder="Code"
+      <CodeMirror
         value={code}
-        onChange={(e) => setCode(e.target.value)}
-        className="w-full rounded border px-2 py-1 font-mono text-black"
-        rows={6}
+        height="300px"
+        extensions={[javascript()]}
+        onChange={(value) => setCode(value)}
+        theme="dark"
+        className="w-full rounded border"
       />
       <button type="submit" className="rounded bg-blue-600 px-2 py-1 text-white">
         Save

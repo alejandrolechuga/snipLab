@@ -31,7 +31,9 @@
     "changeset": "npx changeset"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.4",
     "@reduxjs/toolkit": "*",
+    "@uiw/react-codemirror": "^4.24.1",
     "class-variance-authority": "*",
     "clsx": "*",
     "lucide-react": "*",
