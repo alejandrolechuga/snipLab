@@ -15,17 +15,29 @@ describe('Devtools panel open telemetry', () => {
     const evalMock = jest.fn((_expr: string, cb: (val: any) => void) =>
       cb('example.com')
     );
+    let createCallback: () => void = jest.fn();
+    const createMock = jest.fn(
+      (
+        _title: string,
+        _icon: string,
+        _page: string,
+        cb: () => void
+      ) => {
+        createCallback = cb;
+      }
+    );
     (globalThis as any).chrome = {
       tabs: { sendMessage: jest.fn() },
       devtools: {
         inspectedWindow: { eval: evalMock },
-        panels: { create: jest.fn() },
+        panels: { create: createMock },
       },
       runtime: { onMessage: { addListener: jest.fn() } },
     } as any;
 
     jest.isolateModules(() => {
       require('../index');
+      createCallback();
     });
 
     const { trackEvent } = require('../../../utils/telemetry');
