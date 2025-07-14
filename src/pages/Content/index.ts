@@ -1,6 +1,16 @@
-import { ExtensionMessageOrigin } from '../../../src/types/runtimeMessage';
+import {
+  ExtensionMessageType,
+  ExtensionMessageOrigin,
+} from '../../../src/types/runtimeMessage';
 
 declare const chrome: any;
+
+function injectCode(code: string) {
+  const script = document.createElement('script');
+  script.textContent = `(function(){\n  try {\n${code}\n  } catch (e) {\n    window.postMessage({ source: 'injected-script-error', error: e.message, stack: e.stack }, window.location.origin);\n  }\n})();`;
+  document.documentElement.appendChild(script);
+  script.remove();
+}
 
 const injectMainWorldBridge = async () => {
   if (!chrome.scripting) {
@@ -51,7 +61,12 @@ const injectMainWorldBridge = async () => {
 export const listenInjectedScript = () => {
   window.addEventListener('message', function (event) {
     // Filter out any messages not sent by our extension code
-    if (event.source !== window || !event.data) return;
+    if (
+      event.source !== window ||
+      !event.data ||
+      event.origin !== window.location.origin
+    )
+      return;
 
     // Process messages coming from the injected script
     if (event.data.from === ExtensionMessageOrigin.RECEIVER) {
@@ -82,6 +97,18 @@ export const listenInjectedScript = () => {
         source: ExtensionMessageOrigin.CONTENT_SCRIPT,
         payload: { action: 'BRIDGE_RESPONSE', data: event.data },
       });
+    } else if (event.data.source === 'injected-script-error') {
+      console.error(
+        '[Content] Error caught from injected script:',
+        event.data.error,
+        event.data.stack
+      );
+      chrome.runtime.sendMessage({
+        action: ExtensionMessageType.INJECTED_SCRIPT_ERROR,
+        from: ExtensionMessageOrigin.CONTENT_SCRIPT,
+        error: event.data.error,
+        stack: event.data.stack,
+      });
     }
   });
 };
@@ -93,8 +120,11 @@ export function listenPanelMessages() {
     chrome.runtime.onMessage
   ) {
     chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
-      console.log('[Content] Received message from panel:', message, sender);
-      if (message.from === ExtensionMessageOrigin.DEVTOOLS) {
+      console.log('[Content] Received runtime message:', message, sender);
+      if (message.from === ExtensionMessageOrigin.BACKGROUND && message.action === ExtensionMessageType.RUN_SCRIPT && message.script?.code) {
+        injectCode(message.script.code);
+        sendResponse({ status: 'script_injected', scriptId: message.script.id });
+      } else if (message.from === ExtensionMessageOrigin.DEVTOOLS) {
         if (message.payload?.action === 'CALL_MAIN_WORLD_API') {
           chrome.scripting.executeScript({
             target: { tabId: message.tabId },

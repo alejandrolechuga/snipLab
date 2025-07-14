@@ -11,15 +11,26 @@ const Panel: React.FC = () => {
   const handleRunScript = (s: Script) => {
     const inspected = safeDevtoolsInspectedWindow();
     const tabId = inspected?.tabId;
-    if (tabId === undefined) {
-      console.warn('[Panel] Unable to determine inspected tabId');
+    if (tabId !== undefined) {
+      chrome.runtime.sendMessage(
+        {
+          action: ExtensionMessageType.RUN_SCRIPT,
+          script: s,
+          tabId,
+          from: ExtensionMessageOrigin.DEVTOOLS,
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error sending RUN_SCRIPT message from panel:',
+              chrome.runtime.lastError.message
+            );
+          }
+        }
+      );
+    } else {
+      console.warn('Cannot run script: Inspected tab ID is not available.');
     }
-    chrome.runtime.sendMessage({
-      action: ExtensionMessageType.RUN_SCRIPT,
-      script: s,
-      tabId,
-      from: ExtensionMessageOrigin.DEVTOOLS,
-    });
   };
 
   return (
