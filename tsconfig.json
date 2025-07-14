@@ -23,7 +23,7 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "src/types/assets.d.ts"],
-  "files": ["src/types/assets.d.ts", "src/types/zip-webpack-plugin.d.ts"],
+  "include": ["src/**/*", "src/types/assets.d.ts", "src/types/global.d.ts"],
+  "files": ["src/types/assets.d.ts", "src/types/zip-webpack-plugin.d.ts", "src/types/global.d.ts"],
   "exclude": ["build", "node_modules"]
 }
