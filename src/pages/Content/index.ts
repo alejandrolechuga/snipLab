@@ -6,10 +6,17 @@ import {
 declare const chrome: any;
 
 function injectCode(code: string) {
+  const blob = new Blob([`(function() { ${code} })();`], {
+    type: 'text/javascript',
+  });
+  const url = URL.createObjectURL(blob);
   const script = document.createElement('script');
-  script.textContent = `(function(){\n  try {\n${code}\n  } catch (e) {\n    window.postMessage({ source: 'injected-script-error', error: e.message, stack: e.stack }, window.location.origin);\n  }\n})();`;
-  document.documentElement.appendChild(script);
-  script.remove();
+  script.src = url;
+  script.onload = () => {
+    script.remove();
+    URL.revokeObjectURL(url);
+  };
+  (document.head || document.documentElement).appendChild(script);
 }
 
 const injectMainWorldBridge = async () => {
