@@ -9,6 +9,35 @@ import {
   safeSendMessage,
 } from '../../../src/chrome';
 
+let backgroundPageConnection: chrome.runtime.Port | null = null;
+
+if (chrome.runtime?.connect) {
+  backgroundPageConnection = chrome.runtime.connect({ name: 'devtools-page' });
+  const inspectedWindow = safeDevtoolsInspectedWindow();
+  if (backgroundPageConnection && inspectedWindow) {
+    backgroundPageConnection.postMessage({ tabId: inspectedWindow.tabId });
+  }
+  backgroundPageConnection.onDisconnect.addListener(() => {
+    backgroundPageConnection = null;
+  });
+  backgroundPageConnection.onMessage.addListener((message) => {
+    if (message.action === ExtensionMessageType.RUN_SCRIPT) {
+      const iw = safeDevtoolsInspectedWindow();
+      if (iw) {
+        iw.eval(message.script.code, (result, isException) => {
+          if (isException) {
+            console.error('[SnipLab Devtools] Script execution error:', isException);
+          } else {
+            console.log('[SnipLab Devtools] Script executed successfully:', result);
+          }
+        });
+      } else {
+        console.error('[SnipLab Devtools] Inspected window not available to run script.');
+      }
+    }
+  });
+}
+
 trackEvent('panel_opened');
 if (typeof chrome !== 'undefined') {
   chrome.devtools?.inspectedWindow?.eval?.('location.hostname', (hostname) => {
