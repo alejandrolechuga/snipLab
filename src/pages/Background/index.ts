@@ -25,7 +25,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'RUN_SCRIPT' && message.script?.code) {
-    const tabId = sender.tab?.id;
+    const tabId = typeof message.tabId === 'number' ? message.tabId : undefined;
     if (tabId !== undefined) {
       const port = devtoolsPorts[tabId];
       if (port) {
