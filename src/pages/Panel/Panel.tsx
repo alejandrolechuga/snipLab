@@ -3,7 +3,11 @@ import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
 
-const Panel: React.FC = () => {
+interface PanelProps {
+  inspectedTabId: number;
+}
+
+const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const [editing, setEditing] = useState<Script | null>(null);
 
   return (
@@ -13,7 +17,11 @@ const Panel: React.FC = () => {
         <div className="w-1/3 overflow-y-auto pr-4 border-r border-zinc-700">
           <ScriptList
             onRun={(s) => {
-              chrome.runtime.sendMessage({ action: 'RUN_SCRIPT', script: s });
+              chrome.runtime.sendMessage({
+                action: 'RUN_SCRIPT',
+                script: s,
+                tabId: inspectedTabId,
+              });
             }}
             onEdit={(s) => setEditing(s)}
           />
