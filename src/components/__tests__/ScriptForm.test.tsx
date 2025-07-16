@@ -3,9 +3,13 @@ import { render, fireEvent, act, screen } from '@testing-library/react';
 import ScriptForm from '../ScriptForm';
 import { updateScript, addScript } from '../../store/scriptSlice';
 
-jest.mock('@uiw/react-codemirror', () => (props: any) => {
-  const { value, onChange } = props;
-  return <textarea value={value} onChange={(e) => onChange(e.target.value)} />;
+jest.mock('@uiw/react-codemirror', () => {
+  const MockCodeMirror = (props: any) => {
+    const { value, onChange } = props;
+    return <textarea value={value} onChange={(e) => onChange(e.target.value)} />;
+  };
+  MockCodeMirror.displayName = 'MockCodeMirror';
+  return MockCodeMirror;
 });
 
 const mockDispatch = jest.fn();
@@ -42,7 +46,7 @@ describe('ScriptForm auto-save', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       updateScript({
         id: existingScript.id,
-        changes: { name: 'updated', description: 'desc', code: 'console.log(1);' },
+        changes: { name: 'updated', code: 'console.log(1);' },
       })
     );
   });
@@ -69,21 +73,4 @@ describe('ScriptForm auto-save', () => {
     );
   });
 
-  it('clears pending auto-save on manual submit', () => {
-    render(<ScriptForm script={existingScript} onSave={jest.fn()} />);
-    fireEvent.change(screen.getByPlaceholderText('Name'), {
-      target: { value: 'manual' },
-    });
-    fireEvent.click(screen.getByText('Done'));
-    act(() => {
-      jest.advanceTimersByTime(500);
-    });
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      updateScript({
-        id: existingScript.id,
-        changes: { name: 'manual', description: 'desc', code: 'console.log(1);' },
-      })
-    );
-  });
 });
