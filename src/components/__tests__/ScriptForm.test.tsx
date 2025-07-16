@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent, act, screen } from '@testing-library/react';
 import ScriptForm from '../ScriptForm';
-import { updateScript, addScript } from '../../store/scriptSlice';
+import { updateItem, addScript } from '../../store/itemsSlice';
 
 jest.mock('@uiw/react-codemirror', () => {
   const MockCodeMirror = (props: any) => {
@@ -23,6 +23,8 @@ const existingScript = {
   name: 'demo',
   description: 'desc',
   code: 'console.log(1);',
+  type: 'script' as const,
+  parentId: null,
 };
 
 describe('ScriptForm auto-save', () => {
@@ -44,7 +46,7 @@ describe('ScriptForm auto-save', () => {
       jest.advanceTimersByTime(500);
     });
     expect(mockDispatch).toHaveBeenCalledWith(
-      updateScript({
+      updateItem({
         id: existingScript.id,
         changes: { name: 'updated', code: 'console.log(1);' },
       })
@@ -63,7 +65,7 @@ describe('ScriptForm auto-save', () => {
     fireEvent.click(screen.getByText('Save'));
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'scripts/addScript',
+        type: 'items/addScript',
         payload: expect.objectContaining({
           name: 'new',
           description: '',

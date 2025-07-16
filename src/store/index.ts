@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import settingsReducer, { setPatched } from './settingsSlice';
-import scriptsReducer, { setScripts } from './scriptSlice';
+import itemsReducer, { setItems } from './itemsSlice';
 import matchesReducer, { incrementMatch } from './matchSlice';
 import featuresReducer from './featureSlice';
 import {
@@ -18,7 +18,7 @@ import {
 export const store = configureStore({
   reducer: {
     settings: settingsReducer,
-    scripts: scriptsReducer,
+    items: itemsReducer,
     matches: matchesReducer,
     features: featuresReducer,
   },
@@ -30,32 +30,32 @@ export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// When running as a Chrome extension, load persisted settings and scripts from
+// When running as a Chrome extension, load persisted settings and items from
 // chrome.storage.local so the store reflects the last saved state.
-safeGetStorageLocal(['settings', 'scripts']).then(({ settings, scripts }) => {
+safeGetStorageLocal(['settings', 'items']).then(({ settings, items }) => {
   if (settings) {
     store.dispatch(setPatched(settings.patched));
   }
-  if (scripts) {
-    store.dispatch(setScripts(scripts));
+  if (items) {
+    store.dispatch(setItems(items));
   }
 });
 
 let previousSettings = store.getState().settings;
-let previousScripts = store.getState().scripts;
+let previousItems = store.getState().items;
 
-// Persist updates to chrome.storage.local whenever settings or scripts change.
+// Persist updates to chrome.storage.local whenever settings or items change.
 // `previousSettings` and `previousRuleset` track the last values written so
 // we always write the latest state after each dispatch.
 store.subscribe(() => {
   const state = store.getState();
-  const { settings, scripts } = state;
+  const { settings, items } = state;
 
-  if (previousSettings !== settings || previousScripts !== scripts) {
+  if (previousSettings !== settings || previousItems !== items) {
     previousSettings = settings;
-    previousScripts = scripts;
+    previousItems = items;
 
-    safeSetStorageLocal({ settings, scripts });
+    safeSetStorageLocal({ settings, items });
 
     const inspectedWindow = safeDevtoolsInspectedWindow();
     if (chrome.tabs && inspectedWindow) {
@@ -72,8 +72,8 @@ store.subscribe(() => {
 
 export const emitExtensionState = async () => {
   console.log('Emitting initial state to devtools panel');
-  const { scripts, settings } = await safeGetStorageLocal([
-    'scripts',
+  const { items, settings } = await safeGetStorageLocal([
+    'items',
     'settings',
   ]);
   const inspectedWindow = safeDevtoolsInspectedWindow();
@@ -82,7 +82,7 @@ export const emitExtensionState = async () => {
       action: ExtensionMessageType.STATE_UPDATE,
       from: ExtensionMessageOrigin.DEVTOOLS,
       state: {
-        scripts: scripts ?? [],
+        items: items ?? [],
         settings: {
           patched: settings?.patched ?? false,
         },
