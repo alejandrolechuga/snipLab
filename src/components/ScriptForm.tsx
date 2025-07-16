@@ -20,6 +20,10 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
     if (script) {
       setName(script.name);
       setCode(script.code);
+    } else {
+      // Clear fields when switching to creating a new snippet
+      setName('');
+      setCode('');
     }
     if (saveTimeout.current) {
       clearTimeout(saveTimeout.current);
