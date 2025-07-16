@@ -17,13 +17,21 @@ describe('Devtools unload behavior', () => {
 
   it('sends state update when window is closing', () => {
     const sendMessageMock = jest.fn();
+    const portMock = {
+      onMessage: { addListener: jest.fn() },
+      postMessage: jest.fn(),
+      onDisconnect: { addListener: jest.fn() },
+    } as any;
     (globalThis as any).chrome = {
       tabs: { sendMessage: sendMessageMock },
       devtools: {
         inspectedWindow: { tabId: 1 },
         panels: { create: jest.fn() },
       },
-      runtime: { onMessage: { addListener: jest.fn() } },
+      runtime: {
+        onMessage: { addListener: jest.fn() },
+        connect: jest.fn(() => portMock),
+      },
     };
 
     jest.isolateModules(() => {
