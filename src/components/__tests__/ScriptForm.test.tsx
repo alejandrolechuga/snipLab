@@ -4,10 +4,16 @@ import ScriptForm from '../ScriptForm';
 import { updateScript, addScript } from '../../store/scriptSlice';
 
 jest.mock('@uiw/react-codemirror', () => {
-  const MockCodeMirror = (props: any) => {
+  const MockCodeMirror = React.forwardRef((props: any, ref) => {
     const { value, onChange } = props;
-    return <textarea value={value} onChange={(e) => onChange(e.target.value)} />;
-  };
+    return (
+      <textarea
+        ref={ref as React.RefObject<HTMLTextAreaElement>}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  });
   MockCodeMirror.displayName = 'MockCodeMirror';
   return MockCodeMirror;
 });
