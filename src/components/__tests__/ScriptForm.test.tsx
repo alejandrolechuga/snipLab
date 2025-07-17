@@ -71,6 +71,7 @@ describe('ScriptForm auto-save', () => {
       expect.objectContaining({
         type: 'scripts/addScript',
         payload: expect.objectContaining({
+          id: expect.any(String),
           name: 'new',
           description: '',
           code: '',

@@ -3,14 +3,30 @@ import { X } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { addScript } from '../../store/scriptSlice';
+import { v4 as uuidv4 } from 'uuid';
 
 interface PanelProps {
   inspectedTabId: number;
 }
 
 const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
-  const [editing, setEditing] = useState<Script | null>(null);
+  const dispatch = useAppDispatch();
+  const scripts = useAppSelector((state) => state.scripts);
+  const [editingScript, setEditingScript] = useState<Script | null>(null);
   const [filter, setFilter] = useState('');
+
+  const handleAddNewScript = () => {
+    const newScript: Script = {
+      id: uuidv4(),
+      name: `Snippet #${scripts.length + 1}`,
+      description: '',
+      code: '// Your JavaScript code here',
+    };
+    dispatch(addScript(newScript));
+    setEditingScript(newScript);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-800 p-4 text-white">
@@ -37,9 +53,9 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
             </div>
             <button
               className="rounded bg-blue-600 px-2 py-1 text-white"
-              onClick={() => setEditing(null)}
+              onClick={handleAddNewScript}
             >
-              Add New Snippet
+              Create New Snippet
             </button>
           </div>
           <ScriptList
@@ -50,12 +66,15 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
                 tabId: inspectedTabId,
               });
             }}
-            onEdit={(s) => setEditing(s)}
+            onEdit={setEditingScript}
             filterText={filter}
           />
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">
-          <ScriptForm script={editing || undefined} onSave={() => setEditing(null)} />
+          <ScriptForm
+            script={editingScript || undefined}
+            onSave={() => setEditingScript(null)}
+          />
         </div>
       </div>
     </div>

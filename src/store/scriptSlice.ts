@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Script } from '../types/script';
-import { v4 as uuidv4 } from 'uuid';
 
 const initialState: Script[] = [];
 
@@ -8,24 +7,8 @@ const scriptSlice = createSlice({
   name: 'scripts',
   initialState,
   reducers: {
-    addScript: {
-      reducer(state, action: PayloadAction<Script>) {
-        state.push(action.payload);
-      },
-      prepare(
-        script: Omit<Script, 'id'> & {
-          /** Optional parent folder id */
-          parentId?: string;
-        }
-      ) {
-        return {
-          payload: {
-            ...script,
-            id: uuidv4(),
-            parentId: script.parentId,
-          },
-        };
-      },
+    addScript(state, action: PayloadAction<Script>) {
+      state.push(action.payload);
     },
     updateScript(
       state,
