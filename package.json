@@ -38,6 +38,7 @@
     "clsx": "*",
     "lucide-react": "*",
     "react": "^18.2.0",
+    "react-complex-tree": "^2.6.0",
     "react-dom": "^18.2.0",
     "react-redux": "*",
     "tailwind-merge": "*",
