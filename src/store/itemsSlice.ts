@@ -59,7 +59,8 @@ const itemsSlice = createSlice({
       }
     },
     setItems(state, action: PayloadAction<ListItem[]>) {
-      state.items = action.payload;
+      // Ensure items is always an array to avoid runtime errors
+      state.items = Array.isArray(action.payload) ? action.payload : [];
     },
     setSelectedFolderId(state, action: PayloadAction<string | null>) {
       state.selectedFolderId = action.payload;

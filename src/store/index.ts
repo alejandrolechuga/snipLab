@@ -36,9 +36,9 @@ safeGetStorageLocal(['settings', 'items']).then(({ settings, items }) => {
   if (settings) {
     store.dispatch(setPatched(settings.patched));
   }
-  if (items) {
-    store.dispatch(setItems(items));
-  }
+  // Ensure items from storage is a valid array
+  const itemsToSet = Array.isArray(items) ? items : [];
+  store.dispatch(setItems(itemsToSet));
 });
 
 let previousSettings = store.getState().settings;

@@ -45,6 +45,13 @@ describe('store persistence', () => {
     expect(store.getState().items.items).toEqual(stored.items);
   });
 
+  it('defaults to an empty items array when storage has invalid items', async () => {
+    const stored = { settings: { patched: false }, items: {} };
+    createChromeMocks(stored);
+    const { store } = await import('../index');
+    expect(store.getState().items.items).toEqual([]);
+  });
+
   it('persists updates to chrome.storage.local', async () => {
     const stored = { settings: { patched: false }, items: [] };
     const { setMock } = createChromeMocks(stored);
