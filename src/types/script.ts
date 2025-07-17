@@ -1,3 +1,5 @@
+import type { TreeItem, TreeItemIndex } from 'react-complex-tree';
+
 export interface Script {
   id: string;
   name: string;
@@ -9,3 +11,18 @@ export interface Script {
    */
   parentId?: string;
 }
+
+export interface Folder {
+  id: string;
+  name: string;
+  /** Optional parent folder */
+  parentId?: string;
+}
+
+export type ItemData =
+  | { type: 'script'; script: Script }
+  | { type: 'folder'; folder: Folder };
+
+export type ListItem = TreeItem<ItemData>;
+
+export type ListItems = Record<TreeItemIndex, ListItem>;

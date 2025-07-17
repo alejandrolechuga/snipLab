@@ -38,15 +38,17 @@ describe('store persistence', () => {
           code: 'console.log(1);',
         },
       ],
+      items: {},
     };
     createChromeMocks(stored);
     const { store } = await import('../index');
     expect(store.getState().settings.patched).toBe(true);
     expect(store.getState().scripts).toEqual(stored.scripts);
+    expect(store.getState().items).toEqual({});
   });
 
   it('persists updates to chrome.storage.local', async () => {
-    const stored = { settings: { patched: false }, scripts: [] };
+    const stored = { settings: { patched: false }, scripts: [], items: {} };
     const { setMock } = createChromeMocks(stored);
     const { store } = await import('../index');
 
@@ -54,6 +56,7 @@ describe('store persistence', () => {
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
       scripts: [],
+      items: {},
     });
 
     store.dispatch(
@@ -66,6 +69,7 @@ describe('store persistence', () => {
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
       scripts: expect.any(Array),
+      items: {},
     });
     const lastCall = setMock.mock.calls[setMock.mock.calls.length - 1][0];
     expect(lastCall.scripts).toHaveLength(1);

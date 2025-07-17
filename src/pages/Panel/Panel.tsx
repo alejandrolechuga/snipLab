@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
-import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
+import { Tree } from 'react-complex-tree';
+import {
+  UncontrolledTreeEnvironment,
+  StaticTreeDataProvider,
+} from 'react-complex-tree';
+import 'react-complex-tree/lib/style-modern.css';
+import { useAppSelector } from '../../store';
 
 interface PanelProps {
   inspectedTabId: number;
@@ -11,6 +17,30 @@ interface PanelProps {
 const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const [editing, setEditing] = useState<Script | null>(null);
   const [filter, setFilter] = useState('');
+  const scripts = useAppSelector((s) => s.scripts);
+
+  const treeItems = useMemo(() => {
+    const filtered = scripts.filter((s) =>
+      s.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    const items: any = {
+      root: {
+        index: 'root',
+        isFolder: true,
+        children: filtered.map((s) => s.id),
+        data: { type: 'folder', folder: { id: 'root', name: 'root' } },
+      },
+    };
+    filtered.forEach((s) => {
+      items[s.id] = {
+        index: s.id,
+        isFolder: false,
+        children: [],
+        data: { type: 'script', script: s },
+      };
+    });
+    return items;
+  }, [scripts, filter]);
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-800 p-4 text-white">
@@ -42,17 +72,40 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
               Add New Snippet
             </button>
           </div>
-          <ScriptList
-            onRun={(s) => {
-              chrome.runtime.sendMessage({
-                action: 'RUN_SCRIPT',
-                script: s,
-                tabId: inspectedTabId,
-              });
+          <UncontrolledTreeEnvironment
+            canDragAndDrop
+            canReorderItems
+            canDropOnFolder
+            dataProvider={new StaticTreeDataProvider(treeItems)}
+            getItemTitle={(item) =>
+              item.data.type === 'script'
+                ? item.data.script.name
+                : item.data.folder.name
+            }
+            viewState={{ 'tree-1': { expandedItems: ['root'] } }}
+            onPrimaryAction={(item) => {
+              if (item.data.type === 'script') {
+                chrome.runtime.sendMessage({
+                  action: 'RUN_SCRIPT',
+                  script: item.data.script,
+                  tabId: inspectedTabId,
+                });
+              }
             }}
-            onEdit={(s) => setEditing(s)}
-            filterText={filter}
-          />
+            onSelectItems={(ids) => {
+              const id = ids[0];
+              const item = treeItems[id];
+              if (item?.data.type === 'script') {
+                setEditing(item.data.script);
+              }
+            }}
+          >
+            <Tree
+              treeId="tree-1"
+              rootItem="root"
+              treeLabel="Scripts"
+            />
+          </UncontrolledTreeEnvironment>
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">
           <ScriptForm script={editing || undefined} onSave={() => setEditing(null)} />
