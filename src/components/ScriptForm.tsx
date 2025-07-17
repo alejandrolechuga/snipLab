@@ -2,15 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { useAppDispatch } from '../store';
-import { addScript, updateScript } from '../store/scriptSlice';
+import { addScript, updateItem } from '../store/itemsSlice';
 import type { Script } from '../types/script';
 
 interface ScriptFormProps {
   script?: Script;
   onSave?: () => void;
+  currentParentId?: string | null;
 }
 
-const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
+const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave, currentParentId }) => {
   const dispatch = useAppDispatch();
   const [name, setName] = useState(script?.name || '');
   const [code, setCode] = useState(script?.code || '');
@@ -40,7 +41,7 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
     }
     saveTimeout.current = setTimeout(() => {
       dispatch(
-        updateScript({
+        updateItem({
           id: script.id,
           changes: { name, code },
         })
@@ -84,9 +85,9 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
       saveTimeout.current = null;
     }
     if (script) {
-      dispatch(updateScript({ id: script.id, changes: { name, code } }));
+      dispatch(updateItem({ id: script.id, changes: { name, code } }));
     } else {
-      dispatch(addScript({ name, description: '', code }));
+      dispatch(addScript({ name, description: '', code, parentId: currentParentId ?? null }));
       setName('');
       setCode('');
     }

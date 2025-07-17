@@ -1,5 +1,5 @@
 import { setPatched } from '../settingsSlice';
-import { addScript } from '../scriptSlice';
+import { addScript } from '../itemsSlice';
 
 describe('store persistence', () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe('store persistence', () => {
   it('loads persisted data on init', async () => {
     const stored = {
       settings: { patched: true },
-      scripts: [
+      items: [
         {
           id: '1',
           name: 'test',
@@ -42,18 +42,25 @@ describe('store persistence', () => {
     createChromeMocks(stored);
     const { store } = await import('../index');
     expect(store.getState().settings.patched).toBe(true);
-    expect(store.getState().scripts).toEqual(stored.scripts);
+    expect(store.getState().items.items).toEqual(stored.items);
+  });
+
+  it('defaults to an empty items array when storage has invalid items', async () => {
+    const stored = { settings: { patched: false }, items: {} };
+    createChromeMocks(stored);
+    const { store } = await import('../index');
+    expect(store.getState().items.items).toEqual([]);
   });
 
   it('persists updates to chrome.storage.local', async () => {
-    const stored = { settings: { patched: false }, scripts: [] };
+    const stored = { settings: { patched: false }, items: [] };
     const { setMock } = createChromeMocks(stored);
     const { store } = await import('../index');
 
     store.dispatch(setPatched(true));
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
-      scripts: [],
+      items: { items: [], selectedFolderId: null, expandedFolders: [] },
     });
 
     store.dispatch(
@@ -61,13 +68,14 @@ describe('store persistence', () => {
         name: 'demo',
         description: '',
         code: 'console.log(1);',
+        parentId: null,
       })
     );
     expect(setMock).toHaveBeenLastCalledWith({
       settings: { patched: true },
-      scripts: expect.any(Array),
+      items: expect.objectContaining({ items: expect.any(Array) }),
     });
     const lastCall = setMock.mock.calls[setMock.mock.calls.length - 1][0];
-    expect(lastCall.scripts).toHaveLength(1);
+    expect(lastCall.items.items).toHaveLength(1);
   });
 });

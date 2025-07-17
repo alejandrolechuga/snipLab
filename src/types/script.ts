@@ -1,11 +1,17 @@
-export interface Script {
+export interface BaseItem {
   id: string;
   name: string;
+  parentId: string | null;
+}
+
+export interface Script extends BaseItem {
+  type: 'script';
   description: string;
   code: string;
-  /**
-   * Optional id of the script acting as this script's parent folder.
-   * If not provided, the script is considered top-level.
-   */
-  parentId?: string;
 }
+
+export interface Folder extends BaseItem {
+  type: 'folder';
+}
+
+export type ListItem = Script | Folder;

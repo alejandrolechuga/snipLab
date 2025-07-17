@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, FileText, FolderPlus, ArrowLeftSquare } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { addFolder, setSelectedFolderId } from '../../store/itemsSlice';
 import type { Script } from '../../types/script';
 
 interface PanelProps {
@@ -9,8 +11,23 @@ interface PanelProps {
 }
 
 const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
+  const dispatch = useAppDispatch();
+  const { selectedFolderId, items } = useAppSelector((s) => s.items);
   const [editing, setEditing] = useState<Script | null>(null);
   const [filter, setFilter] = useState('');
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const breadcrumbs = React.useMemo(() => {
+    const chain: string[] = [];
+    let current = selectedFolderId;
+    while (current) {
+      const item = items.find((i) => i.id === current);
+      if (!item) break;
+      chain.unshift(item.name);
+      current = item.parentId;
+    }
+    return chain;
+  }, [selectedFolderId, items]);
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-800 p-4 text-white">
@@ -36,11 +53,38 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
               )}
             </div>
             <button
-              className="rounded bg-blue-600 px-2 py-1 text-white"
+              className="rounded bg-blue-600 p-2 text-white"
               onClick={() => setEditing(null)}
             >
-              Add New Snippet
+              <FileText size={16} />
             </button>
+            <button
+              className="rounded bg-green-600 p-2 text-white"
+              onClick={() => {
+                const action = addFolder({ parentId: selectedFolderId });
+                dispatch(action);
+                setEditId(action.payload.id);
+              }}
+            >
+              <FolderPlus size={16} />
+            </button>
+            {selectedFolderId && (
+              <button
+                className="rounded bg-zinc-700 p-2"
+                onClick={() => dispatch(setSelectedFolderId(null))}
+              >
+                <ArrowLeftSquare size={16} />
+              </button>
+            )}
+          </div>
+          <div className="mb-2 text-sm text-zinc-300">
+            Root
+            {breadcrumbs.map((b, idx) => (
+              <span key={b}>
+                {' > '}
+                {b}
+              </span>
+            ))}
           </div>
           <ScriptList
             onRun={(s) => {
@@ -51,11 +95,17 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
               });
             }}
             onEdit={(s) => setEditing(s)}
-            filterText={filter}
+            currentFolderId={selectedFolderId}
+            editId={editId}
+            onEditIdChange={setEditId}
           />
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">
-          <ScriptForm script={editing || undefined} onSave={() => setEditing(null)} />
+          <ScriptForm
+            script={editing || undefined}
+            onSave={() => setEditing(null)}
+            currentParentId={selectedFolderId}
+          />
         </div>
       </div>
     </div>

@@ -76,7 +76,7 @@ window.addEventListener('beforeunload', () => {
       from: ExtensionMessageOrigin.DEVTOOLS,
       state: {
         settings: { patched: false },
-        scripts: [],
+        items: [],
       },
     });
   }
