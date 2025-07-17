@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { useAppDispatch } from '../store';
 import { addScript, updateScript } from '../store/scriptSlice';
+import { v4 as uuidv4 } from 'uuid';
 import type { Script } from '../types/script';
 
 interface ScriptFormProps {
@@ -63,7 +64,10 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
     if (script) {
       dispatch(updateScript({ id: script.id, changes: { name, code } }));
     } else {
-      dispatch(addScript({ name, description: '', code }));
+      console.warn(
+        'ScriptForm: Adding new script directly from form (not via "Create New Snippet" button).'
+      );
+      dispatch(addScript({ id: uuidv4(), name, description: '', code }));
       setName('');
       setCode('');
     }
