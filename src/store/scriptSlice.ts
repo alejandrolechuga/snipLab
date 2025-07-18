@@ -1,14 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Script } from '../types/script';
+import { v4 as uuidv4 } from 'uuid';
 
-const initialState: Script[] = [];
+const initialState: Script[] = [
+  {
+    id: uuidv4(),
+    name: 'Snippet #1',
+    description: 'Your first code snippet.',
+    code: '// write or paste your snippet code here',
+  },
+];
 
 const scriptSlice = createSlice({
   name: 'scripts',
   initialState,
   reducers: {
-    addScript(state, action: PayloadAction<Script>) {
-      state.push(action.payload);
+    addScript: {
+      reducer(state, action: PayloadAction<Script>) {
+        state.push(action.payload);
+      },
+      prepare(script: Omit<Script, 'id'>) {
+        return { payload: { ...script, id: uuidv4() } };
+      },
     },
     updateScript(
       state,

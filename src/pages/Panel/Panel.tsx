@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, FilePlus } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { addScript } from '../../store/scriptSlice';
-import { v4 as uuidv4 } from 'uuid';
 
 interface PanelProps {
   inspectedTabId: number;
@@ -14,18 +13,42 @@ interface PanelProps {
 const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const dispatch = useAppDispatch();
   const scripts = useAppSelector((state) => state.scripts);
-  const [editingScript, setEditingScript] = useState<Script | null>(null);
+  const [editingScript, setEditingScript] = useState<Script | null>(
+    scripts.length > 0 ? scripts[0] : null
+  );
+  const didInit = useRef(false);
+
+  useEffect(() => {
+    if (!didInit.current) {
+      didInit.current = true;
+      if (scripts.length === 0) {
+        const action = addScript({
+          name: 'Snippet #1',
+          description: 'Your first code snippet.',
+          code: '// write or paste your snippet code here',
+        });
+        dispatch(action);
+        setEditingScript(action.payload);
+        return;
+      }
+    }
+
+    if (scripts.length === 0) {
+      setEditingScript(null);
+    } else if (!editingScript || !scripts.some((s) => s.id === editingScript.id)) {
+      setEditingScript(scripts[0]);
+    }
+  }, [scripts, dispatch]);
   const [filter, setFilter] = useState('');
 
   const handleAddNewScript = () => {
-    const newScript: Script = {
-      id: uuidv4(),
+    const action = addScript({
       name: `Snippet #${scripts.length + 1}`,
       description: '',
       code: '// Your JavaScript code here',
-    };
-    dispatch(addScript(newScript));
-    setEditingScript(newScript);
+    });
+    dispatch(action);
+    setEditingScript(action.payload);
   };
 
   return (
@@ -73,10 +96,12 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
           />
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">
-          <ScriptForm
-            script={editingScript || undefined}
-            onSave={() => setEditingScript(null)}
-          />
+          {editingScript && (
+            <ScriptForm
+              script={editingScript}
+              onSave={() => setEditingScript(null)}
+            />
+          )}
         </div>
       </div>
     </div>
