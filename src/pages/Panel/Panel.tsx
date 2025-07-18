@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, FilePlus } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
@@ -16,14 +16,29 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const [editingScript, setEditingScript] = useState<Script | null>(
     scripts.length > 0 ? scripts[0] : null
   );
+  const didInit = useRef(false);
 
   useEffect(() => {
+    if (!didInit.current) {
+      didInit.current = true;
+      if (scripts.length === 0) {
+        const action = addScript({
+          name: 'Snippet #1',
+          description: 'Your first code snippet.',
+          code: '// write or paste your snippet code here',
+        });
+        dispatch(action);
+        setEditingScript(action.payload);
+        return;
+      }
+    }
+
     if (scripts.length === 0) {
       setEditingScript(null);
     } else if (!editingScript || !scripts.some((s) => s.id === editingScript.id)) {
       setEditingScript(scripts[0]);
     }
-  }, [scripts, editingScript]);
+  }, [scripts, dispatch]);
   const [filter, setFilter] = useState('');
 
   const handleAddNewScript = () => {
