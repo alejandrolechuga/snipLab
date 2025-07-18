@@ -1,6 +1,5 @@
 import { setPatched } from '../settingsSlice';
 import { addScript } from '../scriptSlice';
-import { v4 as uuidv4 } from 'uuid';
 
 describe('store persistence', () => {
   beforeEach(() => {
@@ -59,7 +58,6 @@ describe('store persistence', () => {
 
     store.dispatch(
       addScript({
-        id: uuidv4(),
         name: 'demo',
         description: '',
         code: 'console.log(1);',

@@ -5,7 +5,6 @@ import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { addScript } from '../../store/scriptSlice';
-import { v4 as uuidv4 } from 'uuid';
 
 interface PanelProps {
   inspectedTabId: number;
@@ -14,18 +13,19 @@ interface PanelProps {
 const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const dispatch = useAppDispatch();
   const scripts = useAppSelector((state) => state.scripts);
-  const [editingScript, setEditingScript] = useState<Script | null>(null);
+  const [editingScript, setEditingScript] = useState<Script | null>(
+    scripts.length > 0 ? scripts[0] : null
+  );
   const [filter, setFilter] = useState('');
 
   const handleAddNewScript = () => {
-    const newScript: Script = {
-      id: uuidv4(),
+    const action = addScript({
       name: `Snippet #${scripts.length + 1}`,
       description: '',
       code: '// Your JavaScript code here',
-    };
-    dispatch(addScript(newScript));
-    setEditingScript(newScript);
+    });
+    dispatch(action);
+    setEditingScript(action.payload);
   };
 
   return (
