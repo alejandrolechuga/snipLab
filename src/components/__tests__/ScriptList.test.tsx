@@ -24,4 +24,12 @@ describe('ScriptList row selection', () => {
     expect(selectedRow).toHaveClass('bg-zinc-700');
     expect(otherRow).not.toHaveClass('bg-zinc-700');
   });
+
+  it('triggers onEdit when row is clicked', () => {
+    const onEdit = jest.fn();
+    render(<ScriptList onRun={jest.fn()} onEdit={onEdit} />);
+    const firstRow = screen.getByText('first').closest('tr');
+    firstRow?.click();
+    expect(onEdit).toHaveBeenCalledWith(scripts[0]);
+  });
 });

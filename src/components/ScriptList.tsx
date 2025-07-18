@@ -42,25 +42,31 @@ const ScriptList: React.FC<ScriptListProps> = ({
             onClick={() => onEdit(s)}
           >
             <td className="py-1">{s.name}</td>
-            <td
-              className="py-1 text-right"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <td className="py-1 text-right">
               <button
                 className="mr-2 text-blue-500 hover:text-blue-700"
-                onClick={() => onRun(s)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRun(s);
+                }}
               >
                 <Play size={16} />
               </button>
               <button
                 className="mr-2 text-yellow-500 hover:text-yellow-700"
-                onClick={() => onEdit(s)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(s);
+                }}
               >
                 <Edit size={16} />
               </button>
               <button
                 className="text-red-500 hover:text-red-700"
-                onClick={() => dispatch(deleteScript(s.id))}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  dispatch(deleteScript(s.id));
+                }}
               >
                 <Trash2 size={16} />
               </button>
