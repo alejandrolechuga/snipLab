@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, FilePlus } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
@@ -16,6 +16,14 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
   const [editingScript, setEditingScript] = useState<Script | null>(
     scripts.length > 0 ? scripts[0] : null
   );
+
+  useEffect(() => {
+    if (scripts.length === 0) {
+      setEditingScript(null);
+    } else if (!editingScript || !scripts.some((s) => s.id === editingScript.id)) {
+      setEditingScript(scripts[0]);
+    }
+  }, [scripts, editingScript]);
   const [filter, setFilter] = useState('');
 
   const handleAddNewScript = () => {
@@ -73,10 +81,12 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
           />
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">
-          <ScriptForm
-            script={editingScript || undefined}
-            onSave={() => setEditingScript(null)}
-          />
+          {editingScript && (
+            <ScriptForm
+              script={editingScript}
+              onSave={() => setEditingScript(null)}
+            />
+          )}
         </div>
       </div>
     </div>
