@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, FilePlus } from 'lucide-react';
 import ScriptForm from '../../components/ScriptForm';
 import ScriptList from '../../components/ScriptList';
 import type { Script } from '../../types/script';
@@ -51,12 +51,13 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
                 </button>
               )}
             </div>
-            <button
-              className="rounded bg-blue-600 px-2 py-1 text-white"
-              onClick={handleAddNewScript}
-            >
-              Create New Snippet
-            </button>
+          <button
+            className="rounded bg-blue-600 p-2 text-white"
+            onClick={handleAddNewScript}
+            aria-label="Create New Snippet"
+          >
+            <FilePlus size={16} />
+          </button>
           </div>
           <ScriptList
             onRun={(s) => {
