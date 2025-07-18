@@ -1,4 +1,4 @@
-# SnipLab
+# SnipLab -
 
 SnipLab is a developer-focused Chrome extension that lets you create, manage,
 and run JavaScript snippets directly within any webpage.
