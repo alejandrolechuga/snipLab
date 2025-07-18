@@ -59,15 +59,15 @@ const ScriptForm: React.FC<ScriptFormProps> = ({ script, onSave }) => {
   // Resize CodeMirror editor when the window size changes
   useEffect(() => {
     const handleResize = () => {
-      const container = codeMirrorRef.current?.editor;
-      if (container) {
-        const parent = container.parentElement;
+      const editorDom = codeMirrorRef.current?.view?.dom;
+      if (editorDom) {
+        const parent = editorDom.parentElement;
         if (parent) {
           const newWidth = parent.clientWidth;
           const offsetTop = parent.getBoundingClientRect().top;
           const availableHeight = window.innerHeight - offsetTop - 200;
-          container.style.width = `${newWidth}px`;
-          container.style.height = `${Math.max(200, availableHeight)}px`;
+          editorDom.style.width = `${newWidth}px`;
+          editorDom.style.height = `${Math.max(200, availableHeight)}px`;
           codeMirrorRef.current?.view?.requestMeasure();
         }
       }
