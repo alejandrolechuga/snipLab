@@ -4,6 +4,7 @@ import settingsReducer, { setPatched } from './settingsSlice';
 import scriptsReducer, { setScripts } from './scriptSlice';
 import matchesReducer, { incrementMatch } from './matchSlice';
 import featuresReducer from './featureSlice';
+import devtoolsReducer, { setDevtoolsPanelReady } from './devtoolsSlice';
 import {
   ExtensionMessageType,
   ExtensionMessageOrigin,
@@ -21,11 +22,13 @@ export const store = configureStore({
     scripts: scriptsReducer,
     matches: matchesReducer,
     features: featuresReducer,
+    devtools: devtoolsReducer,
   },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export { setDevtoolsPanelReady } from './devtoolsSlice';
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
@@ -43,6 +46,7 @@ safeGetStorageLocal(['settings', 'scripts']).then(({ settings, scripts }) => {
 
 let previousSettings = store.getState().settings;
 let previousScripts = store.getState().scripts;
+let isContentScriptReady = false;
 
 // Persist updates to chrome.storage.local whenever settings or scripts change.
 // `previousSettings` and `previousRuleset` track the last values written so
@@ -58,7 +62,7 @@ store.subscribe(() => {
     safeSetStorageLocal({ settings, scripts });
 
     const inspectedWindow = safeDevtoolsInspectedWindow();
-    if (chrome.tabs && inspectedWindow) {
+    if (isContentScriptReady && chrome.tabs && inspectedWindow) {
       safeSendMessage(inspectedWindow.tabId, {
         action: ExtensionMessageType.STATE_UPDATE,
         from: ExtensionMessageOrigin.DEVTOOLS,
@@ -95,6 +99,10 @@ export const emitExtensionState = async () => {
 
 if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((message) => {
+    if (message.payload?.action === ExtensionMessageType.RECEIVER_READY) {
+      isContentScriptReady = true;
+      emitExtensionState();
+    }
     if (message.payload?.action === ExtensionMessageType.RULE_MATCHED) {
       store.dispatch(incrementMatch(message.payload.ruleId));
     }

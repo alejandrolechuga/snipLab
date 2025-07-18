@@ -1,4 +1,5 @@
 import { emitExtensionState } from '../../../src/store';
+import { setDevtoolsPanelReady, store } from '../../store';
 import { trackEvent } from '../../../src/utils/telemetry';
 import {
   ExtensionMessageType,
@@ -54,21 +55,16 @@ if (chrome.devtools?.panels) {
     'panel.html',
     () => {
       console.log('SnipLab panel created');
+      store.dispatch(setDevtoolsPanelReady(true));
     }
   );
 } else {
   console.error('DevTools panels API is not available');
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-  if (message.source === ExtensionMessageOrigin.CONTENT_SCRIPT) {
-    if (message.payload.action === ExtensionMessageType.RECEIVER_READY) {
-      emitExtensionState();
-    }
-  }
-});
 
 window.addEventListener('beforeunload', () => {
+  store.dispatch(setDevtoolsPanelReady(false));
   const inspectedWindow = safeDevtoolsInspectedWindow();
   if (chrome.tabs && inspectedWindow) {
     safeSendMessage(inspectedWindow.tabId, {
