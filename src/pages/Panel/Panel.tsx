@@ -69,6 +69,7 @@ const Panel: React.FC<PanelProps> = ({ inspectedTabId }) => {
             }}
             onEdit={setEditingScript}
             filterText={filter}
+            selectedId={editingScript?.id}
           />
         </div>
         <div className="w-2/3 overflow-y-auto pl-4">

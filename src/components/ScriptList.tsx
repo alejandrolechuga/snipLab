@@ -9,9 +9,16 @@ interface ScriptListProps {
   onEdit: (script: Script) => void;
   /** Filter text applied to name, description or code */
   filterText?: string;
+  /** Currently selected script id for highlighting */
+  selectedId?: string | null;
 }
 
-const ScriptList: React.FC<ScriptListProps> = ({ onRun, onEdit, filterText }) => {
+const ScriptList: React.FC<ScriptListProps> = ({
+  onRun,
+  onEdit,
+  filterText,
+  selectedId,
+}) => {
   const scripts = useAppSelector((state) => state.scripts);
   const dispatch = useAppDispatch();
 
@@ -31,7 +38,7 @@ const ScriptList: React.FC<ScriptListProps> = ({ onRun, onEdit, filterText }) =>
         {filtered.map((s) => (
           <tr
             key={s.id}
-            className="cursor-pointer border-b last:border-none hover:bg-zinc-700"
+            className={`cursor-pointer border-b last:border-none hover:bg-zinc-700 ${s.id === selectedId ? 'bg-zinc-700' : ''}`}
             onClick={() => onEdit(s)}
           >
             <td className="py-1">{s.name}</td>
